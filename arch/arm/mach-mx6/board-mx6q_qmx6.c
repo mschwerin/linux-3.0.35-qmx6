@@ -299,8 +299,63 @@ static int mx6_qmx6_sgtl5000_init(void)
 	clk_enable(clko);
 	return 0;
 }
+
+static void mx6q_mipi_sensor_io_init(void)
+{
+	if (cpu_is_mx6dl())
+		mxc_iomux_v3_setup_multiple_pads(mx6dl_qmx6_mipi_sensor_pads,
+			ARRAY_SIZE(mx6dl_qmx6_mipi_sensor_pads));
+	else
+		mxc_iomux_v3_setup_multiple_pads(mx6q_qmx6_mipi_sensor_pads,
+			ARRAY_SIZE(mx6q_qmx6_mipi_sensor_pads));
+
+	/* Camera power down - active high */
+	gpio_request(MX6Q_QMX6_CSI0_PWN, "cam-pwdn");
+	gpio_direction_output(MX6Q_QMX6_CSI0_PWN, 1);
+	gpio_set_value(MX6Q_QMX6_CSI0_PWN, 1);
+	msleep(1);
+	gpio_set_value(MX6Q_QMX6_CSI0_PWN, 0);
+
+	/* Camera reset - active low */
+	gpio_request(MX6Q_QMX6_CSI0_RST, "cam-reset");
+	gpio_direction_output(MX6Q_QMX6_CSI0_RST, 1);
+	gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
+	msleep(1);
+	gpio_set_value(MX6Q_QMX6_CSI0_RST, 1);
+
+	/* for mx6dl, mipi virtual channel 0 connect to csi 0*/
+	if (cpu_is_mx6dl())
+		mxc_iomux_set_gpr_register(13, 0, 3, 0);
+}
+
+static void mx6q_mipi_powerdown(int powerdown)
+{
+        if (powerdown)
+        {
+                gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
+                gpio_set_value(MX6Q_QMX6_CSI0_PWN, 1);
+        }
+        else
+        {
+                gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
+                gpio_set_value(MX6Q_QMX6_CSI0_PWN, 0);
+                msleep(1);      /* t3 >= 1ms */
+                gpio_set_value(MX6Q_QMX6_CSI0_RST, 1);
+                msleep(20);     /* t4 >= 20ms */
+        }
+}
+
 static struct imxi2c_platform_data mx6q_qmx6_i2c_data = {
 	.bitrate = 100000,
+};
+
+
+static struct fsl_mxc_camera_platform_data ov5640_mipi_data = {
+       .mclk =24000000,
+       .mclk_source = 0,
+       .csi = 0,
+       .io_init = mx6q_mipi_sensor_io_init,
+       .pwdn = mx6q_mipi_powerdown,
 };
 
 static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
@@ -318,6 +373,10 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 		I2C_BOARD_INFO("mma8451", 0x1c),
 		.platform_data = (void *)&mma8451_position,
 	},
+        {
+                I2C_BOARD_INFO("ov5640_mipi", 0x3c),
+                .platform_data = (void *)&ov5640_mipi_data,
+        },
 };
 
 static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
@@ -539,11 +598,11 @@ static struct fsl_mxc_ldb_platform_data ldb_data = {
 static struct imx_ipuv3_platform_data ipu_data[] = {
 	{
 	.rev = 4,
-	.csi_clk[0] = "clko_clk",
+	.csi_clk[0] = "clko2_clk",
 	.bypass_reset = false,
 	}, {
 	.rev = 4,
-	.csi_clk[0] = "clko_clk",
+	.csi_clk[0] = "clko2_clk",
 	.bypass_reset = false,
 	},
 };
@@ -796,6 +855,22 @@ static int __init early_enable_lcd_ldb(char *p)
 }
 early_param("enable_lcd_ldb", early_enable_lcd_ldb);
 
+static struct mipi_csi2_platform_data mipi_csi2_data = {
+       .ipu_id  = 0,
+       .csi_id = 0,
+       .v_channel = 0,
+       .lanes = 2,
+       .dphy_clk = "mipi_pllref_clk",
+       .pixel_clk = "emi_clk",
+};
+
+static struct fsl_mxc_capture_platform_data capture_data = {
+	.csi = 0,
+	.ipu = 0,
+	.mclk_source = 0,
+	.is_mipi = 1
+};
+
 /*!
  * Board specific initialization.
  */
@@ -876,6 +951,8 @@ static void __init mx6_qmx6_board_init(void)
 	imx6q_add_vdoa();
 	imx6q_add_ldb(&ldb_data);
 	imx6q_add_v4l2_output(0);
+	imx6q_add_v4l2_capture(0, &capture_data);
+	imx6q_add_mipi_csi2(&mipi_csi2_data);
 
 	if (board_is_qmx6_revy())
 	{

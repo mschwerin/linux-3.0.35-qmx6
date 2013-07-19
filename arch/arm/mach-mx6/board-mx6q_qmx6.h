@@ -225,4 +225,10 @@ static iomux_v3_cfg_t mx6q_qmx6_i2c2_pads[] = {
 	MX6Q_PAD_KEY_COL3__I2C2_SCL,	/* I2C2 SCL */
 	MX6Q_PAD_KEY_ROW3__I2C2_SDA,	/* I2C2 SDA */
 };
+
+static iomux_v3_cfg_t mx6q_qmx6_mipi_sensor_pads[] = {
+	MX6Q_PAD_CSI0_MCLK__CCM_CLKO,           /* camera CLK (soic output at 24MHz) */
+	MX6Q_PAD_NANDF_RB0__GPIO_6_10,          /* camera PWDN */
+	MX6Q_PAD_GPIO_8__GPIO_1_8               /* camera RST */
+};
 #endif
