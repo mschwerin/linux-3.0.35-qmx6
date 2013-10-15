@@ -273,6 +273,13 @@ static struct mxc_audio_platform_data mx6_qmx6_audio_data = {
 };
 static int mx6_qmx6_sgtl5000_init(void)
 {
+	mx6_qmx6_audio_data.sysclk = 24000000;
+	printk("SGLT5000: audio sysclk fix configured to: %d\n",mx6_qmx6_audio_data.sysclk);
+	return 0;
+}
+
+static int mx6_qmx6_clko_init(void)
+{
 	struct clk *clko;
 	struct clk *new_parent;
 	int rate;
@@ -289,12 +296,11 @@ static int mx6_qmx6_sgtl5000_init(void)
 	}
 	rate = clk_round_rate(clko, 16000000);
 	if (rate < 8000000 || rate > 27000000) {
-		pr_err("Error:SGTL5000 mclk freq %d out of range!\n", rate);
+		pr_err("Error: mclk freq %d out of range!\n", rate);
 		clk_put(clko);
 		return -1;
 	}
 
-	mx6_qmx6_audio_data.sysclk = rate;
 	clk_set_rate(clko, rate);
 	clk_enable(clko);
 	return 0;
@@ -1011,6 +1017,7 @@ static void __init mx6_qmx6_board_init(void)
 		imx6q_add_ahci(0, &mx6q_qmx6_sata_data);
 	imx6q_add_vpu();
 	imx6q_init_audio();
+	mx6_qmx6_clko_init();
 	platform_device_register(&qmx6_vmmc_reg_devices);
 	imx_asrc_data.asrc_core_clk = clk_get(NULL, "asrc_clk");
 	imx_asrc_data.asrc_audio_clk = clk_get(NULL, "asrc_serial_clk");
