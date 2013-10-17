@@ -190,7 +190,17 @@ static int mx6q_qmx6_fec_phy_init(struct phy_device *phydev)
 	phy_write(phydev, 0x0e, 0x8);
 	phy_write(phydev, 0x0d, 0xc002);
 	phy_write(phydev, 0x0e, 0x3fff);
+
+	/* fix KSZ9031 link up issue */
+
 	phy_write(phydev, 0x0d, 0x0);
+	phy_write(phydev, 0x0e, 0x4);
+	phy_write(phydev, 0x0d, 0x4000);
+	phy_write(phydev, 0x0e, 0x6);
+	phy_write(phydev, 0x0d, 0x0000);
+	phy_write(phydev, 0x0e, 0x3);
+	phy_write(phydev, 0x0d, 0x4000);
+	phy_write(phydev, 0x0e, 0x1A80);
 
 	return 0;
 }
