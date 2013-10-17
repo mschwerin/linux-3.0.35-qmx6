@@ -208,6 +208,9 @@ static iomux_v3_cfg_t mx6dl_qmx6_revA_pads[] = {
 	/* UART5 */
 	MX6DL_PAD_KEY_COL1__UART5_TXD,
 	MX6DL_PAD_KEY_ROW1__UART5_RXD,
+
+	/* WDOG */
+	MX6DL_PAD_DISP0_DAT8__WDOG1_WDOG_B,	/* Watchdog */
 };
 
 static iomux_v3_cfg_t mx6dl_qmx6_can_pads[] = {
