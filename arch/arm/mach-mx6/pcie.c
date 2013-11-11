@@ -1010,11 +1010,11 @@ static int __devinit imx_pcie_pltfm_probe(struct platform_device *pdev)
 				PCI_EXP_TYPE_ROOT_PORT << 12, IOMUXC_GPR12);
 	imx_pcie_clrset(IOMUXC_GPR12_LOS_LEVEL, 9 << 4, IOMUXC_GPR12);
 
-	imx_pcie_clrset(IOMUXC_GPR8_TX_DEEMPH_GEN1, 0 << 0, IOMUXC_GPR8);
-	imx_pcie_clrset(IOMUXC_GPR8_TX_DEEMPH_GEN2_3P5DB, 0 << 6, IOMUXC_GPR8);
-	imx_pcie_clrset(IOMUXC_GPR8_TX_DEEMPH_GEN2_6DB, 20 << 12, IOMUXC_GPR8);
+	imx_pcie_clrset(IOMUXC_GPR8_TX_DEEMPH_GEN1, 15 << 0, IOMUXC_GPR8);
+	imx_pcie_clrset(IOMUXC_GPR8_TX_DEEMPH_GEN2_3P5DB, 15 << 6, IOMUXC_GPR8);
+	imx_pcie_clrset(IOMUXC_GPR8_TX_DEEMPH_GEN2_6DB, 31 << 12, IOMUXC_GPR8);
 	imx_pcie_clrset(IOMUXC_GPR8_TX_SWING_FULL, 127 << 18, IOMUXC_GPR8);
-	imx_pcie_clrset(IOMUXC_GPR8_TX_SWING_LOW, 127 << 25, IOMUXC_GPR8);
+	imx_pcie_clrset(IOMUXC_GPR8_TX_SWING_LOW, 63 << 25, IOMUXC_GPR8);
 
 	/* Enable the pwr, clks and so on */
 	imx_pcie_enable_controller(dev);
