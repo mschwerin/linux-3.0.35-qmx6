@@ -1112,7 +1112,6 @@ static int fec_enet_mii_init(struct platform_device *pdev)
 	const struct platform_device_id *id_entry =
 				platform_get_device_id(fep->pdev);
 	int err = -ENXIO, i;
-	struct clk *bus_clk;
 
 	/*
 	 * The dual fec interfaces are not equivalent with enet-mac.
@@ -1141,15 +1140,8 @@ static int fec_enet_mii_init(struct platform_device *pdev)
 	/*
 	 * Set MII speed to 2.5 MHz (= clk_get_rate() / 2 * phy_speed)
 	 */
-//freescale 3.0.35 4.1.0
 	fep->phy_speed = DIV_ROUND_UP(clk_get_rate(fep->mdc_clk),
 					(FEC_ENET_MII_CLK << 2)) << 1;
-
-//congatec 3.0.35 1.1.0
-	// sml 2012-11-29: MII Speed derived from 66MHz ipg-clk
-	bus_clk = clk_get(NULL, "ipg_clk");
-	fep->phy_speed = (DIV_ROUND_UP(clk_get_rate(bus_clk),FEC_ENET_MII_CLK))-1;
-
 	/* set hold time to 2 internal clock cycle */
 	if (cpu_is_mx6q() || cpu_is_mx6dl())
 		fep->phy_speed |= FEC_ENET_HOLD_TIME;
