@@ -995,6 +995,7 @@ static void __init mx6_qmx6_board_init(void)
 		BUG_ON(gpio_direction_input(MX6Q_QMX6_RTC_INT));
 	}
 
+	/* I2C */
 	imx6q_add_imx_i2c(0, &mx6q_qmx6_i2c_data);
 	imx6q_add_imx_i2c(1, &mx6q_qmx6_i2c_data);
 	imx6q_add_imx_i2c(2, &mx6q_qmx6_i2c_data);
@@ -1004,14 +1005,11 @@ static void __init mx6_qmx6_board_init(void)
 			ARRAY_SIZE(mxc_i2c1_board_info));
 	i2c_register_board_info(2, mxc_i2c2_board_info,
 			ARRAY_SIZE(mxc_i2c2_board_info));
-	ret = gpio_request(MX6Q_QMX6_PFUZE_INT, "pFUZE-int");
-	if (ret) {
-		printk(KERN_ERR "request pFUZE-int error!!\n");
-		return;
-	} else {
-		gpio_direction_input(MX6Q_QMX6_PFUZE_INT);
-		mx6q_qmx6_init_pfuze100(MX6Q_QMX6_PFUZE_INT);
-	}
+
+	/* pFUZE */
+	BUG_ON(gpio_request(MX6Q_QMX6_PFUZE_INT, "pFUZE-int"));
+	BUG_ON(gpio_direction_input(MX6Q_QMX6_PFUZE_INT));
+	mx6q_qmx6_init_pfuze100(MX6Q_QMX6_PFUZE_INT);
 
 	/* SPI */
 	imx6q_add_ecspi(0, &mx6q_qmx6_spi_data);
