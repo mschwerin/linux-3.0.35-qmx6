@@ -1024,9 +1024,9 @@ static void __init mx6_qmx6_board_init(void)
 	imx6_init_fec(fec_data);
 	imx6q_add_pm_imx(0, &mx6q_qmx6_pm_data);
 
-	/* Move sd3 to first because sd3 connect to emmc.
-	   Mfgtools want emmc is mmcblk0 and other sd card is mmcblk1.
-	*/
+	/* Move SD2 to first place because SD2 is connected to eMMC.
+	 * Mfgtools wants eMMC to be mmcblk0 and other SD card to be
+	 * mmcblk1. */
 	imx6q_add_sdhci_usdhc_imx(1, &mx6q_qmx6_sd2_data);
 	imx6q_add_sdhci_usdhc_imx(2, &mx6q_qmx6_sd3_data);
 	imx6q_add_sdhci_usdhc_imx(3, &mx6q_qmx6_sd4_data);
