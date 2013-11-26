@@ -246,10 +246,10 @@ static struct flash_platform_data imx6_qmx6__spi_flash_data = {
 	.nr_parts = ARRAY_SIZE(imx6_qmx6_spi_nor_partitions),
 	.type = "sst25vf032b",
 };
-#endif
+#endif /* CONFIG_MTD_M25P80 */
 
-static struct spi_board_info imx6_qmx6_spi_nor_device[] __initdata = {
-#if defined(CONFIG_MTD_M25P80)
+static struct spi_board_info imx6_qmx6_board_info[] __initdata = {
+#if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 	{
 	 .modalias = "m25p80",
 	 .max_speed_hz = 20000000,	/* max spi clock (SCK) speed in HZ */
@@ -259,12 +259,6 @@ static struct spi_board_info imx6_qmx6_spi_nor_device[] __initdata = {
 	},
 #endif
 };
-
-static void spi_device_init(void)
-{
-	spi_register_board_info(imx6_qmx6_spi_nor_device,
-				ARRAY_SIZE(imx6_qmx6_spi_nor_device));
-}
 
 static struct imx_ssi_platform_data mx6_qmx6_ssi_pdata = {
 	.flags = IMX_SSI_DMA | IMX_SSI_SYN,
@@ -1012,7 +1006,8 @@ static void __init mx6_qmx6_board_init(void)
 
 	/* SPI */
 	imx6q_add_ecspi(0, &mx6q_qmx6_spi_data);
-	spi_device_init();
+	spi_register_board_info(imx6_qmx6_board_info,
+			ARRAY_SIZE(imx6_qmx6_board_info));
 
 #if defined(CONFIG_MFD_MXC_HDMI) || defined(CONFIG_MFD_MXC_HDMI_MODULE)
 	imx6q_add_mxc_hdmi(&hdmi_data);
