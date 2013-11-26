@@ -1051,15 +1051,15 @@ static void __init mx6_qmx6_board_init(void)
 	imx6q_add_mxc_pwm(3);
 	imx6q_add_mxc_pwm_backlight(3, &mx6_qmx6_pwm_backlight_data);
 
-	/* switch on lcd vcc */
-	gpio_request(MX6Q_QMX6_LCD_EN, "lcden");
-	gpio_direction_output(MX6Q_QMX6_LCD_EN, 1);
-	gpio_set_value(MX6Q_QMX6_LCD_EN, 1);
+	/* switch on LCD VCC */
+	BUG_ON(gpio_request(MX6Q_QMX6_LCD_EN, "lcd_enable"));
+	BUG_ON(gpio_direction_output(MX6Q_QMX6_LCD_EN, 1));
+	gpio_export(MX6Q_QMX6_LCD_EN, 0);
 
-	/* switch on backlight */
-	gpio_request(MX6Q_QMX6_BLT_EN, "backlight");
-	gpio_direction_output(MX6Q_QMX6_BLT_EN, 1);
-	gpio_set_value(MX6Q_QMX6_BLT_EN, 1);
+	/* switch on LCD backlight */
+	BUG_ON(gpio_request(MX6Q_QMX6_BLT_EN, "lcd_backlight"));
+	BUG_ON(gpio_direction_output(MX6Q_QMX6_BLT_EN, 1));
+	gpio_export(MX6Q_QMX6_BLT_EN, 0);
 
 	imx6q_add_otp();
 	imx6q_add_viim();
