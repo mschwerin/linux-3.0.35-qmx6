@@ -751,6 +751,7 @@ static int __init imx6q_init_audio(void)
 }
 
 #if defined(CONFIG_KEYBOARD_GPIO) || defined(CONFIG_KEYBOARD_GPIO_MODULE)
+
 #define GPIO_BUTTON(gpio_num, ev_code, act_low, descr, wake, debounce)	\
 {								\
 	.gpio		= gpio_num,				\
@@ -790,10 +791,7 @@ static void __init imx6q_add_device_buttons(void)
 {
 	platform_device_register(&imx6q_button_device);
 }
-#else
-static void __init imx6q_add_device_buttons(void)
-{
-}
+
 #endif
 
 static struct platform_pwm_backlight_data mx6_qmx6_pwm_backlight_data = {
@@ -1075,7 +1073,11 @@ static void __init mx6_qmx6_board_init(void)
 	imx6q_add_dma();
 
 	imx6q_add_dvfs_core(&qmx6_dvfscore_data);
+
+	/* register GPIO keys */
+#if defined(CONFIG_KEYBOARD_GPIO) || defined(CONFIG_KEYBOARD_GPIO_MODULE)
 	imx6q_add_device_buttons();
+#endif /* CONFIG_KEYBOARD_GPIO */
 
 #if defined(CONFIG_MFD_MXC_HDMI) || defined(CONFIG_MFD_MXC_HDMI_MODULE)
 	imx6q_add_hdmi_soc();
