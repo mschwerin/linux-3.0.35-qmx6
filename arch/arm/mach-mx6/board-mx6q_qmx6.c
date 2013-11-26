@@ -540,6 +540,8 @@ static struct ipuv3_fb_platform_data qmx6_fb_data[] = {
 	},
 };
 
+#if defined(CONFIG_MFD_MXC_HDMI) || defined(CONFIG_MFD_MXC_HDMI_MODULE)
+
 static void hdmi_init(int ipu_id, int disp_id)
 {
 	int hdmi_mux_setting;
@@ -599,6 +601,8 @@ static struct fsl_mxc_hdmi_core_platform_data hdmi_core_data = {
 	.ipu_id = 0,
 	.disp_id = 0,
 };
+
+#endif /* CONFIG_MFD_MXC_HDMI */
 
 static struct fsl_mxc_ldb_platform_data ldb_data = {
 	.ipu_id = 1,
@@ -946,13 +950,18 @@ static void __init mx6_qmx6_board_init(void)
 		ldb_data.disp_id = 0;
 		ldb_data.sec_ipu_id = 0;
 		ldb_data.sec_disp_id = 1;
-		hdmi_core_data.disp_id = 1;
 		if (enable_lcd_ldb) {
 			ldb_data.disp_id = 1;
 			ldb_data.mode = LDB_SIN1;
 		}
 	}
+
+#if defined(CONFIG_MFD_MXC_HDMI) || defined(CONFIG_MFD_MXC_HDMI_MODULE)
+	if (cpu_is_mx6dl()) {
+		hdmi_core_data.disp_id = 1;
+	}
 	imx6q_add_mxc_hdmi_core(&hdmi_core_data);
+#endif /* CONFIG_MFD_MXC_HDMI */
 
 	imx6q_add_ipuv3(0, &ipu_data[0]);
 	if (cpu_is_mx6q()) {
@@ -1005,7 +1014,9 @@ static void __init mx6_qmx6_board_init(void)
 	imx6q_add_ecspi(0, &mx6q_qmx6_spi_data);
 	spi_device_init();
 
+#if defined(CONFIG_MFD_MXC_HDMI) || defined(CONFIG_MFD_MXC_HDMI_MODULE)
 	imx6q_add_mxc_hdmi(&hdmi_data);
+#endif /* CONFIG_MFD_MXC_HDMI */
 
 	imx6q_add_anatop_thermal_imx(1, &mx6q_qmx6_anatop_thermal_data);
 	imx6_init_fec(fec_data);
@@ -1056,8 +1067,10 @@ static void __init mx6_qmx6_board_init(void)
 	imx6q_add_dvfs_core(&qmx6_dvfscore_data);
 	imx6q_add_device_buttons();
 
+#if defined(CONFIG_MFD_MXC_HDMI) || defined(CONFIG_MFD_MXC_HDMI_MODULE)
 	imx6q_add_hdmi_soc();
 	imx6q_add_hdmi_soc_dai();
+#endif /* CONFIG_MFD_MXC_HDMI */
 
 	if (cpu_is_mx6dl()) {
 		imx6dl_add_imx_pxp();
