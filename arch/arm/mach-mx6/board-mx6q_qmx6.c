@@ -407,6 +407,7 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 	{
 	 I2C_BOARD_INFO("m41t62", 0x68),
 	 .platform_data = (void *)0,
+	 .irq = gpio_to_irq(MX6Q_QMX6_RTC_INT),
 	},
 };
 
@@ -990,13 +991,8 @@ static void __init mx6_qmx6_board_init(void)
 		imx6q_add_imx_snvs_rtc();
 	} else {
 		/* external I2C RTC */
-		if (gpio_request(MX6Q_QMX6_RTC_INT, "rtc") == 0) {
-			if (gpio_direction_input(MX6Q_QMX6_RTC_INT) == 0)
-				mxc_i2c2_board_info[0].irq =
-				    gpio_to_irq(MX6Q_QMX6_RTC_INT);
-			else
-				gpio_free(MX6Q_QMX6_RTC_INT);
-		}
+		BUG_ON(gpio_request(MX6Q_QMX6_RTC_INT, "rtc"));
+		BUG_ON(gpio_direction_input(MX6Q_QMX6_RTC_INT));
 	}
 
 	imx6q_add_imx_i2c(0, &mx6q_qmx6_i2c_data);
