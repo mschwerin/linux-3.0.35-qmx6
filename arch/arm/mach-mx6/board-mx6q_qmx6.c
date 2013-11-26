@@ -31,12 +31,10 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/flash.h>
 #include <linux/i2c.h>
-#include <linux/i2c/pca953x.h>
 #include <linux/ata.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
 #include <linux/mtd/partitions.h>
-#include <linux/regulator/consumer.h>
 #include <linux/pmic_external.h>
 #include <linux/pmic_status.h>
 #include <linux/ipu.h>
