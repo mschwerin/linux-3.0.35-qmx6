@@ -128,7 +128,6 @@ extern char *gp_reg_id;
 extern char *soc_reg_id;
 extern char *pu_reg_id;
 
-
 static const struct esdhc_platform_data mx6q_qmx6_sd2_data __initconst = {
 	.cd_gpio = MX6Q_QMX6_SD2_CD,
 	.wp_gpio = -1,
@@ -215,7 +214,7 @@ static int mx6q_qmx6_spi_cs[] = {
 };
 
 static const struct spi_imx_master mx6q_qmx6_spi_data __initconst = {
-	.chipselect     = mx6q_qmx6_spi_cs,
+	.chipselect = mx6q_qmx6_spi_cs,
 	.num_chipselect = ARRAY_SIZE(mx6q_qmx6_spi_cs),
 };
 
@@ -252,11 +251,11 @@ static struct flash_platform_data imx6_qmx6__spi_flash_data = {
 static struct spi_board_info imx6_qmx6_spi_nor_device[] __initdata = {
 #if defined(CONFIG_MTD_M25P80)
 	{
-		.modalias = "m25p80",
-		.max_speed_hz = 20000000, /* max spi clock (SCK) speed in HZ */
-		.bus_num = 0,
-		.chip_select = 0,
-		.platform_data = &imx6_qmx6__spi_flash_data,
+	 .modalias = "m25p80",
+	 .max_speed_hz = 20000000,	/* max spi clock (SCK) speed in HZ */
+	 .bus_num = 0,
+	 .chip_select = 0,
+	 .platform_data = &imx6_qmx6__spi_flash_data,
 	},
 #endif
 };
@@ -281,10 +280,12 @@ static struct mxc_audio_platform_data mx6_qmx6_audio_data = {
 	.ext_port = 6,
 	.hp_gpio = -1,
 };
+
 static int mx6_qmx6_sgtl5000_init(void)
 {
 	mx6_qmx6_audio_data.sysclk = 24000000;
-	printk("SGLT5000: audio sysclk fix configured to: %d\n",mx6_qmx6_audio_data.sysclk);
+	printk("SGLT5000: audio sysclk fix configured to: %d\n",
+	       mx6_qmx6_audio_data.sysclk);
 	return 0;
 }
 
@@ -339,69 +340,64 @@ static void mx6q_mipi_sensor_io_init(void)
 	msleep(1);
 	gpio_set_value(MX6Q_QMX6_CSI0_RST, 1);
 
-	/* for mx6dl, mipi virtual channel 0 connect to csi 0*/
+	/* for mx6dl, mipi virtual channel 0 connect to csi 0 */
 	if (cpu_is_mx6dl())
 		mxc_iomux_set_gpr_register(13, 0, 3, 0);
 }
 
 static void mx6q_mipi_powerdown(int powerdown)
 {
-        if (powerdown)
-        {
-                gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
-                gpio_set_value(MX6Q_QMX6_CSI0_PWN, 1);
-        }
-        else
-        {
-                gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
-                gpio_set_value(MX6Q_QMX6_CSI0_PWN, 0);
-                msleep(1);      /* t3 >= 1ms */
-                gpio_set_value(MX6Q_QMX6_CSI0_RST, 1);
-                msleep(20);     /* t4 >= 20ms */
-        }
+	if (powerdown) {
+		gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
+		gpio_set_value(MX6Q_QMX6_CSI0_PWN, 1);
+	} else {
+		gpio_set_value(MX6Q_QMX6_CSI0_RST, 0);
+		gpio_set_value(MX6Q_QMX6_CSI0_PWN, 0);
+		msleep(1);	/* t3 >= 1ms */
+		gpio_set_value(MX6Q_QMX6_CSI0_RST, 1);
+		msleep(20);	/* t4 >= 20ms */
+	}
 }
 
 static struct imxi2c_platform_data mx6q_qmx6_i2c_data = {
 	.bitrate = 100000,
 };
 
-
 static struct fsl_mxc_camera_platform_data ov5640_mipi_data = {
-       .mclk =24000000,
-       .mclk_source = 0,
-       .csi = 0,
-       .io_init = mx6q_mipi_sensor_io_init,
-       .pwdn = mx6q_mipi_powerdown,
+	.mclk = 24000000,
+	.mclk_source = 0,
+	.csi = 0,
+	.io_init = mx6q_mipi_sensor_io_init,
+	.pwdn = mx6q_mipi_powerdown,
 };
 
 static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 	{
-		I2C_BOARD_INFO("sgtl5000", 0x0a),
+	 I2C_BOARD_INFO("sgtl5000", 0x0a),
 	},
 };
 
-
 static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 	{
-		I2C_BOARD_INFO("mxc_hdmi_i2c", 0x50),
+	 I2C_BOARD_INFO("mxc_hdmi_i2c", 0x50),
 	},
 	{
-		I2C_BOARD_INFO("mma8451", 0x1c),
-		.platform_data = (void *)&mma8451_position,
+	 I2C_BOARD_INFO("mma8451", 0x1c),
+	 .platform_data = (void *)&mma8451_position,
 	},
-        {
-                I2C_BOARD_INFO("ov5640_mipi", 0x3c),
-                .platform_data = (void *)&ov5640_mipi_data,
-        },
+	{
+	 I2C_BOARD_INFO("ov5640_mipi", 0x3c),
+	 .platform_data = (void *)&ov5640_mipi_data,
+	},
 };
 
 static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 	{
-		I2C_BOARD_INFO("mxc_ldb_i2c", 0x50),
+	 I2C_BOARD_INFO("mxc_ldb_i2c", 0x50),
 	},
 	{
-		I2C_BOARD_INFO("m41t62", 0x68),
-		.platform_data = (void *)0,
+	 I2C_BOARD_INFO("m41t62", 0x68),
+	 .platform_data = (void *)0,
 	},
 };
 
@@ -423,8 +419,7 @@ static void __init imx6q_qmx6_init_usb(void)
 	 */
 	ret = gpio_request(MX6Q_QMX6_USB_OTG_PWR, "usb-pwr");
 	if (ret) {
-		pr_err("failed to get GPIO MX6Q_QMX6_USB_OTG_PWR: %d\n",
-			ret);
+		pr_err("failed to get GPIO MX6Q_QMX6_USB_OTG_PWR: %d\n", ret);
 		return;
 	}
 	gpio_direction_output(MX6Q_QMX6_USB_OTG_PWR, 0);
@@ -434,7 +429,7 @@ static void __init imx6q_qmx6_init_usb(void)
 }
 
 /* HW Initialization, if return 0, initialization is successful. */
-static int mx6q_qmx6_sata_init(struct device *dev, void __iomem *addr)
+static int mx6q_qmx6_sata_init(struct device *dev, void __iomem * addr)
 {
 	u32 tmpdata;
 	int ret = 0;
@@ -515,30 +510,33 @@ static struct imx_asrc_platform_data imx_asrc_data = {
 };
 
 static struct ipuv3_fb_platform_data qmx6_fb_data[] = {
-	{ /*fb0*/
-	.disp_dev = "ldb",
-	.interface_pix_fmt = IPU_PIX_FMT_RGB666,
-	.mode_str = "LDB-XGA",
-	.default_bpp = 16,
-	.int_clk = false,
-	}, {
-	.disp_dev = "ldb",
-	.interface_pix_fmt = IPU_PIX_FMT_RGB666,
-	.mode_str = "LDB-SVGA",
-	.default_bpp = 16,
-	.int_clk = false,
-	}, {
-	.disp_dev = "ldb",
-	.interface_pix_fmt = IPU_PIX_FMT_RGB666,
-	.mode_str = "LDB-SVGA",
-	.default_bpp = 16,
-	.int_clk = false,
-	}, {
-	.disp_dev = "ldb",
-	.interface_pix_fmt = IPU_PIX_FMT_RGB666,
-	.mode_str = "LDB-VGA",
-	.default_bpp = 16,
-	.int_clk = false,
+	{ /*fb0 */
+	 .disp_dev = "ldb",
+	 .interface_pix_fmt = IPU_PIX_FMT_RGB666,
+	 .mode_str = "LDB-XGA",
+	 .default_bpp = 16,
+	 .int_clk = false,
+	},
+	{
+	 .disp_dev = "ldb",
+	 .interface_pix_fmt = IPU_PIX_FMT_RGB666,
+	 .mode_str = "LDB-SVGA",
+	 .default_bpp = 16,
+	 .int_clk = false,
+	},
+	{
+	 .disp_dev = "ldb",
+	 .interface_pix_fmt = IPU_PIX_FMT_RGB666,
+	 .mode_str = "LDB-SVGA",
+	 .default_bpp = 16,
+	 .int_clk = false,
+	},
+	{
+	 .disp_dev = "ldb",
+	 .interface_pix_fmt = IPU_PIX_FMT_RGB666,
+	 .mode_str = "LDB-VGA",
+	 .default_bpp = 16,
+	 .int_clk = false,
 	},
 };
 
@@ -557,7 +555,7 @@ static void hdmi_init(int ipu_id, int disp_id)
 	}
 
 	/* Configure the connection between IPU1/2 and HDMI */
-	hdmi_mux_setting = 2*ipu_id + disp_id;
+	hdmi_mux_setting = 2 * ipu_id + disp_id;
 
 	/* GPR3, bits 2-3 = HDMI_MUX_CTL */
 	mxc_iomux_set_gpr_register(3, 2, 2, hdmi_mux_setting);
@@ -613,13 +611,14 @@ static struct fsl_mxc_ldb_platform_data ldb_data = {
 
 static struct imx_ipuv3_platform_data ipu_data[] = {
 	{
-	.rev = 4,
-	.csi_clk[0] = "clko2_clk",
-	.bypass_reset = false,
-	}, {
-	.rev = 4,
-	.csi_clk[0] = "clko2_clk",
-	.bypass_reset = false,
+	 .rev = 4,
+	 .csi_clk[0] = "clko2_clk",
+	 .bypass_reset = false,
+	},
+	{
+	 .rev = 4,
+	 .csi_clk[0] = "clko2_clk",
+	 .bypass_reset = false,
 	},
 };
 
@@ -638,6 +637,7 @@ static void qmx6_suspend_exit(void)
 	/* enable backlight */
 	gpio_set_value(MX6Q_QMX6_BLT_EN, 1);
 }
+
 static const struct pm_platform_data mx6q_qmx6_pm_data __initconst = {
 	.name = "imx_pm",
 	.suspend_enter = qmx6_suspend_enter,
@@ -656,16 +656,16 @@ static struct regulator_init_data qmx6_vmmc_init = {
 };
 
 static struct fixed_voltage_config qmx6_vmmc_reg_config = {
-	.supply_name		= "vmmc",
-	.microvolts		= 3300000,
-	.gpio			= -1,
-	.init_data		= &qmx6_vmmc_init,
+	.supply_name = "vmmc",
+	.microvolts = 3300000,
+	.gpio = -1,
+	.init_data = &qmx6_vmmc_init,
 };
 
 static struct platform_device qmx6_vmmc_reg_devices = {
-	.name	= "reg-fixed-voltage",
-	.id	= 3,
-	.dev	= {
+	.name = "reg-fixed-voltage",
+	.id = 3,
+	.dev = {
 		.platform_data = &qmx6_vmmc_reg_config,
 	},
 };
@@ -693,31 +693,31 @@ static struct regulator_init_data sgtl5000_qmx6_vddio_reg_initdata = {
 };
 
 static struct fixed_voltage_config sgtl5000_qmx6_vdda_reg_config = {
-	.supply_name		= "VDDA",
-	.microvolts		= 2500000,
-	.gpio			= -1,
-	.init_data		= &sgtl5000_qmx6_vdda_reg_initdata,
+	.supply_name = "VDDA",
+	.microvolts = 2500000,
+	.gpio = -1,
+	.init_data = &sgtl5000_qmx6_vdda_reg_initdata,
 };
 
 static struct fixed_voltage_config sgtl5000_qmx6_vddio_reg_config = {
-	.supply_name		= "VDDIO",
-	.microvolts		= 3300000,
-	.gpio			= -1,
-	.init_data		= &sgtl5000_qmx6_vddio_reg_initdata,
+	.supply_name = "VDDIO",
+	.microvolts = 3300000,
+	.gpio = -1,
+	.init_data = &sgtl5000_qmx6_vddio_reg_initdata,
 };
 
 static struct platform_device sgtl5000_qmx6_vdda_reg_devices = {
-	.name	= "reg-fixed-voltage",
-	.id	= 0,
-	.dev	= {
+	.name = "reg-fixed-voltage",
+	.id = 0,
+	.dev = {
 		.platform_data = &sgtl5000_qmx6_vdda_reg_config,
 	},
 };
 
 static struct platform_device sgtl5000_qmx6_vddio_reg_devices = {
-	.name	= "reg-fixed-voltage",
-	.id	= 1,
-	.dev	= {
+	.name = "reg-fixed-voltage",
+	.id = 1,
+	.dev = {
 		.platform_data = &sgtl5000_qmx6_vddio_reg_config,
 	},
 };
@@ -726,8 +726,7 @@ static struct platform_device sgtl5000_qmx6_vddio_reg_devices = {
 
 static int __init imx6q_init_audio(void)
 {
-	mxc_register_device(&mx6_qmx6_audio_device,
-			    &mx6_qmx6_audio_data);
+	mxc_register_device(&mx6_qmx6_audio_device, &mx6_qmx6_audio_data);
 	imx6q_add_imx_ssi(1, &mx6_qmx6_ssi_pdata);
 #ifdef CONFIG_SND_SOC_SGTL5000
 	platform_device_register(&sgtl5000_qmx6_vdda_reg_devices);
@@ -761,15 +760,15 @@ static struct gpio_keys_button imx6q_buttons[] = {
 };
 
 static struct gpio_keys_platform_data imx6q_button_data = {
-	.buttons	= imx6q_buttons,
-	.nbuttons	= ARRAY_SIZE(imx6q_buttons),
+	.buttons = imx6q_buttons,
+	.nbuttons = ARRAY_SIZE(imx6q_buttons),
 };
 
 static struct platform_device imx6q_button_device = {
-	.name		= "gpio-keys",
-	.id		= -1,
-	.num_resources  = 0,
-	.dev		= {
+	.name = "gpio-keys",
+	.id = -1,
+	.num_resources = 0,
+	.dev = {
 		.platform_data = &imx6q_button_data,
 	}
 };
@@ -779,7 +778,9 @@ static void __init imx6q_add_device_buttons(void)
 	platform_device_register(&imx6q_button_device);
 }
 #else
-static void __init imx6q_add_device_buttons(void) {}
+static void __init imx6q_add_device_buttons(void)
+{
+}
 #endif
 
 static struct platform_pwm_backlight_data mx6_qmx6_pwm_backlight_data = {
@@ -789,16 +790,15 @@ static struct platform_pwm_backlight_data mx6_qmx6_pwm_backlight_data = {
 	.pwm_period_ns = 50000,
 };
 
-static const struct flexcan_platform_data
-		mx6_qmx6_flexcan_pdata[] __initconst = {
+static const struct flexcan_platform_data mx6_qmx6_flexcan_pdata[] __initconst = {
 	{
-		.transceiver_switch = NULL,
+	 .transceiver_switch = NULL,
 	},
 };
 
 static struct mxc_dvfs_platform_data qmx6_dvfscore_data = {
 	.reg_id = "VDDCORE",
-	.soc_id	= "VDDSOC",
+	.soc_id = "VDDSOC",
 	.clk1_id = "cpu_clk",
 	.clk2_id = "gpc_dvfs_clk",
 	.gpc_cntr_offset = MXC_GPC_CNTR_OFFSET,
@@ -849,19 +849,18 @@ static void __init fixup_mxc_board(struct machine_desc *desc, struct tag *tags,
 #define SNVS_LPCR 0x38
 static void mx6_snvs_poweroff(void)
 {
-
-	void __iomem *mx6_snvs_base =  MX6_IO_ADDRESS(MX6Q_SNVS_BASE_ADDR);
+	void __iomem *mx6_snvs_base = MX6_IO_ADDRESS(MX6Q_SNVS_BASE_ADDR);
 	u32 value;
 	value = readl(mx6_snvs_base + SNVS_LPCR);
-	/*set TOP and DP_EN bit*/
+	/*set TOP and DP_EN bit */
 	writel(value | 0x60, mx6_snvs_base + SNVS_LPCR);
 }
 
 static const struct imx_pcie_platform_data mx6_qmx6_pcie_data __initconst = {
-	.pcie_pwr_en	= -1,
-	.pcie_rst	= MX6Q_QMX6_PCIE_RST_B,
-	.pcie_wake_up	= MX6Q_QMX6_PCIE_WAKE_B,
-	.pcie_dis	= -1,
+	.pcie_pwr_en = -1,
+	.pcie_rst = MX6Q_QMX6_PCIE_RST_B,
+	.pcie_wake_up = MX6Q_QMX6_PCIE_WAKE_B,
+	.pcie_dis = -1,
 };
 
 static int __init early_enable_lcd_ldb(char *p)
@@ -869,15 +868,16 @@ static int __init early_enable_lcd_ldb(char *p)
 	enable_lcd_ldb = 1;
 	return 0;
 }
+
 early_param("enable_lcd_ldb", early_enable_lcd_ldb);
 
 static struct mipi_csi2_platform_data mipi_csi2_data = {
-       .ipu_id  = 0,
-       .csi_id = 0,
-       .v_channel = 0,
-       .lanes = 2,
-       .dphy_clk = "mipi_pllref_clk",
-       .pixel_clk = "emi_clk",
+	.ipu_id = 0,
+	.csi_id = 0,
+	.v_channel = 0,
+	.lanes = 2,
+	.dphy_clk = "mipi_pllref_clk",
+	.pixel_clk = "emi_clk",
 };
 
 static struct fsl_mxc_capture_platform_data capture_data = {
@@ -914,8 +914,7 @@ static void __init mx6_qmx6_board_init(void)
 		common_pads_cnt = ARRAY_SIZE(mx6q_qmx6_pads);
 		flexcan_pads_cnt = ARRAY_SIZE(mx6q_qmx6_can_pads);
 		revA_pads_cnt = ARRAY_SIZE(mx6q_qmx6_revA_pads);
-	}
-	else if (cpu_is_mx6dl()) {
+	} else if (cpu_is_mx6dl()) {
 		common_pads = mx6dl_qmx6_pads;
 		flexcan_pads = mx6dl_qmx6_can_pads;
 		revA_pads = mx6dl_qmx6_revA_pads;
@@ -970,17 +969,15 @@ static void __init mx6_qmx6_board_init(void)
 	imx6q_add_v4l2_capture(0, &capture_data);
 	imx6q_add_mipi_csi2(&mipi_csi2_data);
 
-	if (board_is_qmx6_revy())
-	{
+	if (board_is_qmx6_revy()) {
 		/* onboard SNVS RTC */
 		imx6q_add_imx_snvs_rtc();
-	}
-	else
-	{
+	} else {
 		/* external I2C RTC */
 		if (gpio_request(MX6Q_QMX6_RTC_INT, "rtc") == 0) {
 			if (gpio_direction_input(MX6Q_QMX6_RTC_INT) == 0)
-				mxc_i2c2_board_info[0].irq = gpio_to_irq(MX6Q_QMX6_RTC_INT);
+				mxc_i2c2_board_info[0].irq =
+				    gpio_to_irq(MX6Q_QMX6_RTC_INT);
 			else
 				gpio_free(MX6Q_QMX6_RTC_INT);
 		}
@@ -1113,7 +1110,7 @@ static void __init mx6_qmx6_timer_init(void)
 }
 
 static struct sys_timer mx6_qmx6_timer = {
-	.init   = mx6_qmx6_timer_init,
+	.init = mx6_qmx6_timer_init,
 };
 
 static void __init mx6q_qmx6_reserve(void)
