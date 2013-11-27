@@ -326,6 +326,29 @@ static int mx6_qmx6_clko_init(void)
 	return 0;
 }
 
+static int mx6_qmx6_clko2_init(void)
+{
+	struct clk *clko2;
+	struct clk *new_parent;
+	int rate;
+
+	clko2 = clk_get(NULL, "clko2_clk");
+	if (IS_ERR(clko2)) {
+		pr_err("can't get CLKO2 clock.\n");
+		return PTR_ERR(clko2);
+	}
+	new_parent = clk_get(NULL, "osc_clk");
+	if (!IS_ERR(new_parent)) {
+		clk_set_parent(clko2, new_parent);
+		clk_put(new_parent);
+	}
+	rate = clk_round_rate(clko2, 24000000);
+
+	clk_set_rate(clko2, rate);
+	clk_enable(clko2);
+	return 0;
+}
+
 static void mx6q_mipi_sensor_io_init(void)
 {
 	if (cpu_is_mx6dl())
@@ -905,10 +928,6 @@ static struct fsl_mxc_capture_platform_data capture_data = {
 static void __init mx6_qmx6_board_init(void)
 {
 	int i;
-	int ret;
-	struct clk *clko2;
-	struct clk *new_parent;
-	int rate;
 
 	iomux_v3_cfg_t *common_pads = NULL;
 	iomux_v3_cfg_t *revA_pads = NULL;
@@ -1086,18 +1105,7 @@ static void __init mx6_qmx6_board_init(void)
 	mxc_iomux_v3_setup_multiple_pads(flexcan_pads, flexcan_pads_cnt);
 	imx6q_add_flexcan0(&mx6_qmx6_flexcan_pdata[0]);
 
-	clko2 = clk_get(NULL, "clko2_clk");
-	if (IS_ERR(clko2))
-		pr_err("can't get CLKO2 clock.\n");
-
-	new_parent = clk_get(NULL, "osc_clk");
-	if (!IS_ERR(new_parent)) {
-		clk_set_parent(clko2, new_parent);
-		clk_put(new_parent);
-	}
-	rate = clk_round_rate(clko2, 24000000);
-	clk_set_rate(clko2, rate);
-	clk_enable(clko2);
+	mx6_qmx6_clko2_init();
 
 	pm_power_off = mx6_snvs_poweroff;
 	imx6q_add_busfreq();
