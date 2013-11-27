@@ -174,7 +174,7 @@ static struct phy_driver ks8001_driver = {
 
 static struct phy_driver ksz9021_driver = {
 	.phy_id		= PHY_ID_KSZ9021,
-	.phy_id_mask	= 0x00ffffff,
+	.phy_id_mask	= MICREL_PHY_ID_MASK,
 	.name		= "Micrel KSZ9021 Gigabit PHY",
 	.features	= (PHY_GBIT_FEATURES | SUPPORTED_Pause
 				| SUPPORTED_Asym_Pause),
@@ -189,7 +189,7 @@ static struct phy_driver ksz9021_driver = {
 
 static struct phy_driver ksz9031_driver = {
 	.phy_id		= PHY_ID_KSZ9031,
-	.phy_id_mask	= 0x00ffffff,
+	.phy_id_mask	= MICREL_PHY_ID_MASK,
 	.name		= "Micrel KSZ9031 Gigabit PHY",
 	.features	= (PHY_GBIT_FEATURES | SUPPORTED_Pause
 				| SUPPORTED_Asym_Pause),
