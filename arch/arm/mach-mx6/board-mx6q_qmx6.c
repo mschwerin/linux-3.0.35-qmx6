@@ -391,16 +391,16 @@ static void mx6q_mipi_powerdown(int powerdown)
 	}
 }
 
-static struct imxi2c_platform_data mx6q_qmx6_i2c_data = {
-	.bitrate = 100000,
-};
-
 static struct fsl_mxc_camera_platform_data ov5640_mipi_data = {
 	.mclk = 24000000,
 	.mclk_source = 0,
 	.csi = 0,
 	.io_init = mx6q_mipi_sensor_io_init,
 	.pwdn = mx6q_mipi_powerdown,
+};
+
+static struct imxi2c_platform_data mx6q_qmx6_i2c_data = {
+	.bitrate = 100000,
 };
 
 static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
