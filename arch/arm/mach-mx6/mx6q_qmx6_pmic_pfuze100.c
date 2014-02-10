@@ -525,5 +525,5 @@ static struct i2c_board_info __initdata pfuze100_i2c_device = {
 int __init mx6q_qmx6_init_pfuze100(u32 int_gpio)
 {
 	pfuze100_i2c_device.irq = gpio_to_irq(int_gpio); /*update INT gpio */
-	return i2c_register_board_info(1, &pfuze100_i2c_device, 1);
+	return i2c_register_board_info(4, &pfuze100_i2c_device, 1);
 }

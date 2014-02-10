@@ -31,6 +31,7 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/flash.h>
 #include <linux/i2c.h>
+#include <linux/gpio-i2cmux.h>
 #include <linux/ata.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
@@ -122,6 +123,7 @@
 #define MX6Q_QMX6_PCIE_RST_B		IMX_GPIO_NR(1, 20)
 #define MX6Q_QMX6_CSI0_PWN		IMX_GPIO_NR(6, 10)
 #define MX6Q_QMX6_PFUZE_INT		IMX_GPIO_NR(5, 16)
+#define MX6Q_QMX6_PFUZE_MUX		IMX_GPIO_NR(6, 9)
 
 #define MX6Q_QMX6_PWROFF		IMX_GPIO_NR(3, 29)
 #define MX6Q_QMX6_GPIO_28		IMX_GPIO_NR(4, 28)
@@ -183,39 +185,70 @@ static inline void mx6q_qmx6_init_uart(void)
 
 static int mx6q_qmx6_fec_phy_init(struct phy_device *phydev)
 {
-	/* adjust KSZ9031 ethernet phy */
+	u16 id1, id2;
+	u16 val;
 
-	phy_write(phydev, 0x0d, 0x2);
-	phy_write(phydev, 0x0e, 0x4);
-	phy_write(phydev, 0x0d, 0xc002);
-	phy_write(phydev, 0x0e, 0x0000);
+	/* check whether Micrel KSZ9031 or Atheros AR8035 has to be configured */
+	id1 = phy_read(phydev, 2);
+	id2 = phy_read(phydev, 3);
 
-	phy_write(phydev, 0x0d, 0x2);
-	phy_write(phydev, 0x0e, 0x5);
-	phy_write(phydev, 0x0d, 0xc002);
-	phy_write(phydev, 0x0e, 0x0000);
+	if ((id1 == 0x22) && ((id2 & 0xFFF0) == 0x1620)) {
+		/* configure KSZ9031 ethernet phy */
+		phy_write(phydev, 0x0d, 0x2);
+		phy_write(phydev, 0x0e, 0x4);
+		phy_write(phydev, 0x0d, 0xc002);
+		phy_write(phydev, 0x0e, 0x0000);
 
-	phy_write(phydev, 0x0d, 0x2);
-	phy_write(phydev, 0x0e, 0x6);
-	phy_write(phydev, 0x0d, 0xc002);
-	phy_write(phydev, 0x0e, 0xffff);
+		phy_write(phydev, 0x0d, 0x2);
+		phy_write(phydev, 0x0e, 0x5);
+		phy_write(phydev, 0x0d, 0xc002);
+		phy_write(phydev, 0x0e, 0x0000);
 
-	phy_write(phydev, 0x0d, 0x2);
-	phy_write(phydev, 0x0e, 0x8);
-	phy_write(phydev, 0x0d, 0xc002);
-	phy_write(phydev, 0x0e, 0x3fff);
+		phy_write(phydev, 0x0d, 0x2);
+		phy_write(phydev, 0x0e, 0x6);
+		phy_write(phydev, 0x0d, 0xc002);
+		phy_write(phydev, 0x0e, 0xffff);
 
-	/* fix KSZ9031 link up issue */
+		phy_write(phydev, 0x0d, 0x2);
+		phy_write(phydev, 0x0e, 0x8);
+		phy_write(phydev, 0x0d, 0xc002);
+		phy_write(phydev, 0x0e, 0x3fff);
 
-	phy_write(phydev, 0x0d, 0x0);
-	phy_write(phydev, 0x0e, 0x4);
-	phy_write(phydev, 0x0d, 0x4000);
-	phy_write(phydev, 0x0e, 0x6);
-	phy_write(phydev, 0x0d, 0x0000);
-	phy_write(phydev, 0x0e, 0x3);
-	phy_write(phydev, 0x0d, 0x4000);
-	phy_write(phydev, 0x0e, 0x1A80);
+		/* fix KSZ9031 link up issue */
 
+		phy_write(phydev, 0x0d, 0x0);
+		phy_write(phydev, 0x0e, 0x4);
+		phy_write(phydev, 0x0d, 0x4000);
+		phy_write(phydev, 0x0e, 0x6);
+		phy_write(phydev, 0x0d, 0x0000);
+		phy_write(phydev, 0x0e, 0x3);
+		phy_write(phydev, 0x0d, 0x4000);
+		phy_write(phydev, 0x0e, 0x1A80);
+
+	}
+
+	if ((id1 == 0x004d) && (id2 == 0xd072)) {
+		/* configure Atheros AR8035 ethernet phy */
+		/* enable AR8035 ouput a 125MHz clk from CLK_25M */
+		phy_write(phydev, 0xd, 0x7);
+		phy_write(phydev, 0xe, 0x8016);
+		phy_write(phydev, 0xd, 0x4007);
+		val = phy_read(phydev, 0xe);
+		val &= 0xfe63;
+		val |= 0x18;
+		phy_write(phydev, 0xe, val);
+
+		/* introduce tx clock delay */
+		phy_write(phydev, 0x1d, 0x5);
+		val = phy_read(phydev, 0x1e);
+		val |= 0x0100;
+		phy_write(phydev, 0x1e, val);
+
+		/* disable hibernation */
+		phy_write(phydev, 0x1d, 0xb);
+		val = phy_read(phydev, 0x1e);
+		phy_write(phydev, 0x1e, 0x3c40);
+	}
 	return 0;
 }
 
@@ -410,6 +443,9 @@ static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 };
 
 static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
+};
+
+static struct i2c_board_info mxc_i2c3_board_info[] __initdata = {
 	{
 	 I2C_BOARD_INFO("mxc_hdmi_i2c", 0x50),
 	},
@@ -433,6 +469,34 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 	 .irq = gpio_to_irq(MX6Q_QMX6_RTC_INT),
 	},
 };
+
+static const unsigned i2c1_gpiomux_values[] = {
+	0, 1,
+};
+
+static const unsigned i2c1_gpiomux_gpios[] = {
+	MX6Q_QMX6_PFUZE_MUX,
+};
+
+static struct gpio_i2cmux_platform_data mx6q_qmx6_i2c1_mux_data = {
+	.parent = 1,
+	.values = i2c1_gpiomux_values,
+	.n_values = ARRAY_SIZE(i2c1_gpiomux_values),
+	.gpios = i2c1_gpiomux_gpios,
+	.n_gpios = ARRAY_SIZE(i2c1_gpiomux_gpios),
+	.base_nr = 3
+};
+
+static struct platform_device mx6q_qmx6_i2c1_i2cmux = {
+	.name = "gpio-i2cmux",
+	.id = 0,
+};
+
+static int __init mx6q_qmx6_init_i2cmux(void)
+{
+	mxc_register_device(&mx6q_qmx6_i2c1_i2cmux, &mx6q_qmx6_i2c1_mux_data);
+	return 0;
+}
 
 static void imx6q_qmx6_usbotg_vbus(bool on)
 {
@@ -1015,6 +1079,7 @@ static void __init mx6_qmx6_board_init(void)
 	}
 
 	/* I2C */
+	mx6q_qmx6_init_i2cmux();
 	imx6q_add_imx_i2c(0, &mx6q_qmx6_i2c_data);
 	imx6q_add_imx_i2c(1, &mx6q_qmx6_i2c_data);
 	imx6q_add_imx_i2c(2, &mx6q_qmx6_i2c_data);
@@ -1024,6 +1089,8 @@ static void __init mx6_qmx6_board_init(void)
 			ARRAY_SIZE(mxc_i2c1_board_info));
 	i2c_register_board_info(2, mxc_i2c2_board_info,
 			ARRAY_SIZE(mxc_i2c2_board_info));
+	i2c_register_board_info(3, mxc_i2c3_board_info,
+			ARRAY_SIZE(mxc_i2c3_board_info));
 
 	/* pFUZE */
 	BUG_ON(gpio_request(MX6Q_QMX6_PFUZE_INT, "pFUZE-int"));

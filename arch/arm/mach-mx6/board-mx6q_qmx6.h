@@ -205,6 +205,9 @@ static iomux_v3_cfg_t mx6q_qmx6_revA_pads[] = {
 	MX6Q_PAD_NANDF_CLE__GPIO_6_7,		/* SMB Alert#*/
 	MX6Q_PAD_NANDF_D0__GPIO_2_0,		/* GPIO2[0]  */
 
+	/* I2C multiplexer */
+	MX6Q_PAD_NANDF_WP_B__GPIO_6_9,
+
 	/* UART5 */
 	MX6Q_PAD_KEY_COL1__UART5_TXD,
 	MX6Q_PAD_KEY_ROW1__UART5_RXD,
